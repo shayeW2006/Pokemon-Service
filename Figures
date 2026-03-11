@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Action Figure Store</title>
+<style>
+body{font-family:Arial;margin:0;background:#f5f5f5;color:#333}
+header{background:#fff;padding:20px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;padding:20px}
+.card{background:#fff;border:1px solid #ddd;border-radius:10px;padding:15px;text-align:center}
+.card img{width:100%;height:150px;object-fit:cover;background:#eee}
+button{background:#444;color:#fff;border:none;padding:10px 15px;border-radius:6px;cursor:pointer}
+#cart{position:fixed;right:0;top:0;width:300px;height:100%;background:#fff;border-left:1px solid #ddd;padding:20px;overflow:auto}
+#checkout{margin-top:20px}
+#gameBox{position:fixed;bottom:10px;right:10px;background:#fff;border:1px solid #ccc;border-radius:10px;padding:10px}
+canvas{background:#eaeaea;border-radius:6px}
+input{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;border-radius:6px}
+</style>
+</head>
+<body>
+
+<header>
+<h2>Action Figure Store</h2>
+<div>Basket: <span id="cartCount">0</span></div>
+</header>
+
+<div class="products" id="products">
+</div>
+
+<div id="cart">
+<h3>Your Basket</h3>
+<ul id="cartItems"></ul>
+<div id="checkout">
+<h4>Checkout</h4>
+<input placeholder="Card Name">
+<input placeholder="Card Number">
+<input placeholder="Expiry">
+<input placeholder="CVV">
+<button>Pay Now</button>
+</div>
+</div>
+
+<div id="gameBox">
+<div>Win 10% Off!</div>
+<canvas id="game" width="200" height="150"></canvas>
+<div id="gameMsg"></div>
+</div>
+
+<script>
+const products=[
+{name:"Figure 1",price:15},
+{name:"Figure 2",price:18},
+{name:"Figure 3",price:22},
+{name:"Figure 4",price:30}
+]
+
+const productDiv=document.getElementById('products')
+const cartItems=document.getElementById('cartItems')
+let cart=[]
+
+products.forEach((p,i)=>{
+const el=document.createElement('div')
+el.className='card'
+el.innerHTML=`<img><h4>${p.name}</h4><p>$${p.price}</p><button onclick="addToCart(${i})">Add to Basket</button>`
+productDiv.appendChild(el)
+})
+
+function addToCart(i){
+cart.push(products[i])
+drawCart()
+}
+
+function drawCart(){
+cartItems.innerHTML=""
+cart.forEach(c=>{
+const li=document.createElement('li')
+li.textContent=c.name+" - $"+c.price
+cartItems.appendChild(li)
+})
+document.getElementById('cartCount').textContent=cart.length
+}
+
+// Mini flappy game
+const canvas=document.getElementById('game')
+const ctx=canvas.getContext('2d')
+let birdY=75
+let velocity=0
+let pipes=[{x:200,gapY:60}]
+let score=0
+
+function loop(){
+ctx.clearRect(0,0,200,150)
+
+velocity+=0.5
+birdY+=velocity
+
+ctx.fillRect(30,birdY,10,10)
+
+pipes.forEach(p=>{
+p.x-=2
+ctx.fillRect(p.x,0,10,p.gapY)
+ctx.fillRect(p.x,p.gapY+40,10,150)
+
+if(p.x===100){pipes.push({x:200,gapY:Math.random()*80})}
+
+if(30<p.x+10&&30>p.x){
+if(birdY<p.gapY||birdY>p.gapY+40){reset()}
+else{score++}
+}
+})
+
+if(birdY>150||birdY<0)reset()
+
+requestAnimationFrame(loop)
+}
+
+function reset(){
+if(score>=5){document.getElementById('gameMsg').textContent="You won! Use code FIGURE10"}
+score=0
+birdY=75
+velocity=0
+pipes=[{x:200,gapY:60}]
+}
+
+document.addEventListener('keydown',()=>velocity=-6)
+
+loop()
+</script>
+
+</body>
+</html>
